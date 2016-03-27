@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  Name:		MFRC522Lib.cpp
  Created:	2016/3/24 17:00:51
  Author:	ycf
@@ -8,21 +8,20 @@
 #include "MFRC522Lib.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//¹¹Ôìº¯Êı
+//æ„é€ å‡½æ•°
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
-* ¹¦    ÄÜ£º¹¹Ôìº¯Êı
+* åŠŸ    èƒ½ï¼šæ„é€ å‡½æ•°
 */
 MFRC522::MFRC522() {
 
 }
 
 /*
-* ¹¦    ÄÜ£º¹¹Ôìº¯Êı£¨Ó²¼şSPI£©
-* ²ÎÊıËµÃ÷£ºchipSelectPin[ÊäÈë]£ºSPI´Ó»úÊ¹ÄÜÒı½Å
-*           resetPin[ÊäÈë]£º¸´Î»Òı½Å
+* åŠŸ    èƒ½ï¼šæ„é€ å‡½æ•°ï¼ˆç¡¬ä»¶SPIï¼‰
+* å‚æ•°è¯´æ˜ï¼šchipSelectPin[è¾“å…¥]ï¼šSPIä»æœºä½¿èƒ½å¼•è„š
+*           resetPin[è¾“å…¥]ï¼šå¤ä½å¼•è„š
 */
-
 MFRC522::MFRC522(byte chipSelectPin, byte resetPin) {
 	_chipSelectPin = chipSelectPin;
 	_resetPin = resetPin;
@@ -30,43 +29,60 @@ MFRC522::MFRC522(byte chipSelectPin, byte resetPin) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//SPIÅäÖÃº¯Êı
+//SPIé…ç½®å‡½æ•°
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
-* ¹¦    ÄÜ£ºSPIÅäÖÃº¯Êı
+* åŠŸ    èƒ½ï¼šSPIé…ç½®å‡½æ•°
 */
 void MFRC522::SPI_Config() {
 	SPI.begin();
-	spisetting = SPISettings(10000000, MSBFIRST, SPI_MODE0);  //MFRC522SPI×î¸ßËÙÂÊÎª10Mbit/s£¬¸ßÎ»ÏÈ·¢ËÍ¡£Êı¾İÊÖ²áµÚ8.1.2²¿·Ö¡£
+	spisetting = SPISettings(10000000, MSBFIRST, SPI_MODE0);  // MFRC522SPIæœ€é«˜é€Ÿç‡ä¸º10Mbit/sï¼Œé«˜ä½å…ˆå‘é€ã€‚æ•°æ®æ‰‹å†Œç¬¬8.1.2éƒ¨åˆ†ã€‚
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//MFRC522µ×²ãº¯Êı£¨¼Ä´æÆ÷¶ÁĞ´£©
+//MFRC522åº•å±‚å‡½æ•°
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
-* ¹¦    ÄÜ£ºĞ´¼Ä´æÆ÷
-* ²ÎÊıËµÃ÷£ºreg[ÊäÈë]£ºÒªĞ´ÈëµÄ¼Ä´æÆ÷µØÖ·¡£MFRC522_RegisterÃ¶¾ÙÖµÖĞµÄÒ»¸ö¡£
-*           value[ÊäÈë]£ºÒªĞ´ÈëµÄÖµ
+* åŠŸ    èƒ½ï¼šå†™å¯„å­˜å™¨
+* å‚æ•°è¯´æ˜ï¼šreg[è¾“å…¥]ï¼šè¦å†™å…¥çš„å¯„å­˜å™¨åœ°å€ã€‚MFRC522_Registeræšä¸¾å€¼ä¸­çš„ä¸€ä¸ªã€‚
+*           value[è¾“å…¥]ï¼šè¦å†™å…¥çš„æ•°æ®
 */
 void MFRC522::WriteReg(byte reg, byte value) {
 	SPI.beginTransaction(spisetting);
 	digitalWrite(_chipSelectPin, LOW);
-	SPI.transfer((reg << 1) & 0x7E);            //Ğ´¼Ä´æÆ÷µØÖ·¸ñÊ½£º0XXXXXXX0£¬¸ßÎ»0±íÊ¾Ğ´£¬µÍÎ»0²»ÓÃÓÚµØÖ·¡£[Êı¾İÊÖ²áµÚ8.1.2.3²¿·Ö]
+	SPI.transfer((reg << 1) & 0x7E);	// å†™å¯„å­˜å™¨åœ°å€æ ¼å¼ï¼š0XXXXXXX0ï¼Œé«˜ä½0è¡¨ç¤ºå†™ï¼Œä½ä½0ä¸ç”¨äºåœ°å€ã€‚[æ•°æ®æ‰‹å†Œç¬¬8.1.2.3éƒ¨åˆ†]
 	SPI.transfer(value);
 	digitalWrite(_chipSelectPin, HIGH);
 	SPI.endTransaction();
 }
 
 /*
-* ¹¦    ÄÜ£º¶Á¼Ä´æÆ÷
-* ²ÎÊıËµÃ÷£ºreg[ÊäÈë]£ºÒª¶ÁÈ¡µÄ¼Ä´æÆ÷µØÖ·¡£MFRC522_RegisterÃ¶¾ÙÖµÖĞµÄÒ»¸ö¡£
-* ·µ    »Ø£º¶ÁÈ¡µ½µÄÖµ
+* åŠŸ    èƒ½ï¼šå†™å¯„å­˜å™¨
+* å‚æ•°è¯´æ˜ï¼šreg[è¾“å…¥]ï¼šè¦å†™å…¥çš„å¯„å­˜å™¨åœ°å€ã€‚MFRC522_Registeræšä¸¾å€¼ä¸­çš„ä¸€ä¸ªã€‚
+*			count[è¾“å…¥]ï¼šè¦å†™å…¥æ•°æ®çš„å­—èŠ‚æ•°
+*           * value[è¾“å…¥]ï¼šè¦å†™å…¥çš„æ•°æ®ï¼Œbyteæ•°ç»„
+*/
+void MFRC522::WriteReg(byte reg, byte count, byte * values) {
+	SPI.beginTransaction(spisetting);
+	digitalWrite(_chipSelectPin, LOW);
+	SPI.transfer((reg << 1) & 0x7E);				// å†™å¯„å­˜å™¨åœ°å€æ ¼å¼ï¼š0XXXXXXX0ï¼Œé«˜ä½0è¡¨ç¤ºå†™ï¼Œä½ä½0ä¸ç”¨äºåœ°å€ã€‚[æ•°æ®æ‰‹å†Œç¬¬8.1.2.3éƒ¨åˆ†]
+	for (byte index = 0; index < count; index++) {
+		SPI.transfer(values[index]);
+	}
+	digitalWrite(_chipSelectPin, HIGH);
+	SPI.endTransaction();
+}
+
+/*
+* åŠŸ    èƒ½ï¼šè¯»å¯„å­˜å™¨
+* å‚æ•°è¯´æ˜ï¼šreg[è¾“å…¥]ï¼šè¦è¯»å–çš„å¯„å­˜å™¨åœ°å€ã€‚MFRC522_Registeræšä¸¾å€¼ä¸­çš„ä¸€ä¸ª
+* è¿”    å›ï¼šè¯»å–åˆ°çš„æ•°æ®
 */
 byte MFRC522::ReadReg(byte reg) {
 	byte value;
 	SPI.beginTransaction(spisetting);
 	digitalWrite(_chipSelectPin, LOW);
-	SPI.transfer(((reg << 1) & 0x7E) | 0x80);   //¶Á¼Ä´æÆ÷µØÖ·¸ñÊ½£º1XXXXXXX0£¬¸ßÎ»1±íÊ¾¶Á£¬µÍÎ»0²»ÓÃÓÚµØÖ·¡£[Êı¾İÊÖ²áµÚ8.1.2.3²¿·Ö]
+	SPI.transfer(((reg << 1) & 0x7E) | 0x80);	// è¯»å¯„å­˜å™¨åœ°å€æ ¼å¼ï¼š1XXXXXXX0ï¼Œé«˜ä½1è¡¨ç¤ºè¯»ï¼Œä½ä½0ä¸ç”¨äºåœ°å€ã€‚[æ•°æ®æ‰‹å†Œç¬¬8.1.2.3éƒ¨åˆ†]
 	value = SPI.transfer(0x00);
 	digitalWrite(_chipSelectPin, HIGH);
 	SPI.endTransaction();
@@ -74,9 +90,29 @@ byte MFRC522::ReadReg(byte reg) {
 }
 
 /*
-* ¹¦    ÄÜ£ºÖÃ¼Ä´æÆ÷Î»
-* ²ÎÊıËµÃ÷£ºreg[ÊäÈë]£ºÒªÖÃÎ»µÄ¼Ä´æÆ÷µØÖ·¡£MFRC522_RegisterÃ¶¾ÙÖµÖĞµÄÒ»¸ö¡£
-* ·µ    »Ø£ºmask[ÊäÈë]£ºÖÃÎ»Öµ
+* åŠŸ    èƒ½ï¼šè¯»å¯„å­˜å™¨
+* å‚æ•°è¯´æ˜ï¼šreg[è¾“å…¥]ï¼šè¦è¯»å–çš„å¯„å­˜å™¨åœ°å€ï¼ŒMFRC522_Registeræšä¸¾å€¼ä¸­çš„ä¸€ä¸ª
+*			count[è¾“å…¥]ï¼šè¦è¯»å–æ•°æ®çš„å­—èŠ‚æ•°
+*           * value[è¾“å‡º]ï¼šå­˜å‚¨è¯»å–æ•°æ®çš„ç¼“å†²åŒºï¼Œbyteæ•°ç»„
+*/
+void MFRC522::ReadReg(byte reg, byte count, byte * values) {
+	byte index = 0;
+	byte address = ((reg << 1) & 0x7E) | 0x80;		// è¯»å¯„å­˜å™¨åœ°å€æ ¼å¼ï¼š1XXXXXXX0ï¼Œé«˜ä½1è¡¨ç¤ºè¯»ï¼Œä½ä½0ä¸ç”¨äºåœ°å€ã€‚[æ•°æ®æ‰‹å†Œç¬¬8.1.2.3éƒ¨åˆ†]
+	SPI.beginTransaction(spisetting);
+	digitalWrite(_chipSelectPin, LOW);
+	SPI.transfer(address);							
+	for (index = 0; index < count - 1; index++) {
+		values[index] = SPI.transfer(address);
+	}
+	values[index] = SPI.transfer(0);
+	digitalWrite(_chipSelectPin, HIGH);
+	SPI.endTransaction();
+}
+
+/*
+* åŠŸ    èƒ½ï¼šç½®å¯„å­˜å™¨ä½
+* å‚æ•°è¯´æ˜ï¼šreg[è¾“å…¥]ï¼šè¦ç½®ä½çš„å¯„å­˜å™¨åœ°å€ã€‚MFRC522_Registeræšä¸¾å€¼ä¸­çš„ä¸€ä¸ª
+*			mask[è¾“å…¥]ï¼šç½®ä½å€¼
 */
 void MFRC522::SetRegBitMask(byte reg, byte mask) {
 	byte temp;
@@ -85,9 +121,9 @@ void MFRC522::SetRegBitMask(byte reg, byte mask) {
 }
 
 /*
-* ¹¦    ÄÜ£ºÇå¼Ä´æÆ÷Î»
-* ²ÎÊıËµÃ÷£ºreg[ÊäÈë]£ºÒªÇåÎ»µÄ¼Ä´æÆ÷µØÖ·¡£MFRC522_RegisterÃ¶¾ÙÖµÖĞµÄÒ»¸ö¡£
-* ·µ    »Ø£ºmask[ÊäÈë]£ºÇåÎ»Öµ
+* åŠŸ    èƒ½ï¼šæ¸…å¯„å­˜å™¨ä½
+* å‚æ•°è¯´æ˜ï¼šreg[è¾“å…¥]ï¼šè¦æ¸…ä½çš„å¯„å­˜å™¨åœ°å€ã€‚MFRC522_Registeræšä¸¾å€¼ä¸­çš„ä¸€ä¸ª
+*			mask[è¾“å…¥]ï¼šæ¸…ä½å€¼
 */
 void MFRC522::ClearRegBitMask(byte reg, byte mask) {
 	byte temp;
@@ -95,50 +131,82 @@ void MFRC522::ClearRegBitMask(byte reg, byte mask) {
 	WriteReg(reg, temp | (~mask));
 }
 
+/*
+* åŠŸ    èƒ½ï¼šä½¿ç”¨MFRC522çš„CRCåå¤„ç†å™¨è®¡ç®—CRC
+* å‚æ•°è¯´æ˜ï¼š* data[è¾“å…¥]ï¼šæŒ‡é’ˆæŒ‡å‘è¦ä¼ è‡³FIFOè¿›è¡ŒCRCè®¡ç®—çš„å€¼
+*			length[è¾“å…¥]ï¼šä¼ è¾“çš„å­—èŠ‚æ•°
+*			* result[è¾“å‡º]ï¼šæŒ‡å‘ç»“æœç¼“å­˜åŒºï¼Œç»“æœå†™å…¥result[0..1]ï¼Œä½å­—èŠ‚åœ¨å‰
+* è¿”    å›ï¼šSTATUS_OKè¡¨ç¤ºæˆåŠŸï¼Œå…¶ä»–ç»“æœå‚ç…§çŠ¶æ€ç 
+*/
+MFRC522::StatusCode MFRC522::CalculateCRC(byte * data, byte length, byte * result) {
+	WriteReg(CommandReg, RC522_CMD_Idle);		// åœæ­¢ä»»ä½•åœ¨æ´»åŠ¨çš„å‘½ä»¤
+	WriteReg(DivIrqReg, 0x04);					// æ¸…é™¤CRCIRqä¸­æ–­è¯·æ±‚ä½
+	SetRegBitMask(FIFOLevelReg, 0x80);			// FlushBufferç½®ä½ï¼ŒFIFOåˆå§‹åŒ–
+	WriteReg(FIFODataReg, length, data);		// æ•°æ®å†™å…¥FIFO
+	WriteReg(CommandReg, RC522_CMD_CalcCRC);	// å¼€å§‹CRCè®¡ç®—
+												
+	word i = 5000;								// ç­‰å¾…CRCè®¡ç®—å®Œæˆï¼Œè¯¥whileå¾ªç¯çš„æ¯æ¬¡è¿­ä»£é¢„è®¡éœ€è¦17.73us
+	byte n;
+	while (1) {
+		n = ReadReg(DivIrqReg);					// DivIrqReg[7..0]çš„å†…å®¹ä¸º: Set2 ä¿ç•™ ä¿ç•™ MfinActIRq ä¿ç•™ CRCIRq ä¿ç•™ ä¿ç•™
+		if (n & 0x04) {							// CRCIRqç½®ä½ï¼Œè®¡ç®—å®Œæˆ
+			break;
+		}
+		if (--i == 0) {							// 89mså†…æ²¡å®Œæˆï¼Œè¶…æ—¶ç»ˆæ­¢ï¼Œä¸RC522çš„é€šè®¯å¯èƒ½æ–­å¼€äº†
+			return STATUS_TIMEOUT;
+		}
+	}
+	WriteReg(CommandReg, RC522_CMD_Idle);		// åœæ­¢CRCè®¡ç®—ï¼Œæ–°å†…å®¹å¯ä»¥å†™å…¥FIFO
+
+	result[0] = ReadReg(CRCResultRegL);			// å°†ç»“æœä»å¯„å­˜å™¨ä¼ è‡³ç»“æœç¼“å­˜åŒº
+	result[1] = ReadReg(CRCResultRegH);
+	return STATUS_OK;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//MFRC522¹¦ÄÜº¯Êı
+//MFRC522åŠŸèƒ½å‡½æ•°
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
-* ¹¦    ÄÜ£º³õÊ¼»¯MFRC522
+* åŠŸ    èƒ½ï¼šåˆå§‹åŒ–MFRC522
 */
 void MFRC522::RC522_Init() {
-	pinMode(_chipSelectPin, OUTPUT);      //ÉèÖÃchipSelectPinÎªÊı×ÖÊä³ö
-	digitalWrite(_chipSelectPin, HIGH);   //ÔİÊ±»¹²»ÓÃ¹¤×÷
-	pinMode(_resetPin, OUTPUT);           //ÉèÖÃresetPinÎªÊı×ÖÊä³ö
+	pinMode(_chipSelectPin, OUTPUT);		// è®¾ç½®chipSelectPinä¸ºæ•°å­—è¾“å‡º
+	digitalWrite(_chipSelectPin, HIGH);		// æš‚æ—¶è¿˜ä¸ç”¨å·¥ä½œ
+	pinMode(_resetPin, OUTPUT);				// è®¾ç½®resetPinä¸ºæ•°å­—è¾“å‡º
 
-	SPI_Config();                         //³õÊ¼»¯SPI×ÜÏß
+	SPI_Config();							// åˆå§‹åŒ–SPIæ€»çº¿
 
-	if (LOW == digitalRead(_resetPin)) {   //Ğ¾Æ¬ÔÚÓ²µôµçÄ£Ê½ÏÂ
-		digitalWrite(_resetPin, HIGH);      //ÍË³öÓ²µôµçÄ£Ê½£¬´¥·¢Ó²¼şÖØÖÃ
-		delay(50);                          //µÈ´ı¾§ÕñÆğÕñºÍÎÈ¶¨£¬ÖÁÉÙĞèÒªt_startup(Æô¶¯Ê±¼ä)+t_delay(37.74us),ÕâÀï¸ø50ms×ã¹»ÁË[Êı¾İÊÖ²á8.8.2²¿·Ö]
+	if (LOW == digitalRead(_resetPin)) {	// èŠ¯ç‰‡åœ¨ç¡¬æ‰ç”µæ¨¡å¼ä¸‹
+		digitalWrite(_resetPin, HIGH);		// é€€å‡ºç¡¬æ‰ç”µæ¨¡å¼ï¼Œè§¦å‘ç¡¬ä»¶é‡ç½®
+		delay(50);							// ç­‰å¾…æ™¶æŒ¯èµ·æŒ¯å’Œç¨³å®šï¼Œè‡³å°‘éœ€è¦t_startup(å¯åŠ¨æ—¶é—´)+t_delay(37.74us)ï¼Œè¿™é‡Œç»™50msè¶³å¤Ÿäº†[æ•°æ®æ‰‹å†Œ8.8.2éƒ¨åˆ†]
 	}
 	else {
-		RC522_Reset();                    //½øĞĞÈí¼şÖØÖÃ
+		RC522_Reset();						// è¿›è¡Œè½¯é‡ç½®
 	}
 
-	//ÉèÖÃÓëRFID±êÇ©Í¨Ñ¶Ê±µÄ³¬Ê±Ê±¼ä
-	//¶¨Ê±Æ÷ÆµÂÊ = 13.56MHz/(TPrescaler*2+1),TPrescalerµÄÖµÓÉTModeRegµÄµÍ4Î»ºÍTPrescalerReg×é³É
-	WriteReg(TModeReg, 0x80);             //TAuto=1£»¶¨Ê±Æ÷ÔÚËùÓĞÍ¨Ñ¶Ä£Ê½ËùÓĞËÙÂÊµÄ·¢ËÍ½áÊøÊ±×Ô¶¯Æô¶¯£¬ÔÚ½ÓÊÕµ½µÚÒ»¸öÊı¾İÎ»ºó¶¨Ê±Æ÷Á¢¼´Í£Ö¹
-	WriteReg(TPrescalerReg, 0xA9);        //TPrescaler=TModeReg[3..0]:TPrescalerReg[7..0],ÕâÀïÎª0x0A9 = 168 => ¶¨Ê±Æ÷ÆµÂÊ=40kHz,ÖÜÆÚÎª25us
-	WriteReg(TReloadRegH, 0x03);          //¶¨Ê±Æ÷ÖØ×°Öµ£º0x3E8 = 1000,¼´³¬Ê±Ê±¼äÎª25ms
+	// è®¾ç½®ä¸RFIDæ ‡ç­¾é€šè®¯æ—¶çš„è¶…æ—¶æ—¶é—´
+	// å®šæ—¶å™¨é¢‘ç‡ = 13.56MHz/(TPrescaler*2+1)ï¼ŒTPrescalerçš„å€¼ç”±TModeRegçš„ä½4ä½å’ŒTPrescalerRegç»„æˆ
+	WriteReg(TModeReg, 0x80);				// TAutoç½®ä½ï¼Œå®šæ—¶å™¨åœ¨æ‰€æœ‰é€šè®¯æ¨¡å¼æ‰€æœ‰é€Ÿç‡çš„å‘é€ç»“æŸæ—¶è‡ªåŠ¨å¯åŠ¨ï¼Œåœ¨æ¥æ”¶åˆ°ç¬¬ä¸€ä¸ªæ•°æ®ä½åå®šæ—¶å™¨ç«‹å³åœæ­¢
+	WriteReg(TPrescalerReg, 0xA9);			// TPrescaler=TModeReg[3..0]:TPrescalerReg[7..0]ï¼Œè¿™é‡Œä¸º0x00A9 = 168 => å®šæ—¶å™¨é¢‘ç‡=40kHzï¼Œå‘¨æœŸä¸º25us
+	WriteReg(TReloadRegH, 0x03);			// å®šæ—¶å™¨é‡è£…å€¼ï¼š0x3E8 = 1000ï¼Œå³è¶…æ—¶æ—¶é—´ä¸º25ms
 	WriteReg(TReloadRegL, 0xE8);
 
-	WriteReg(TxASKReg, 0x40);             //Ä¬ÈÏÎª0x00,Ç¿ÖÆ100%ASKµ÷ÖÆ
-	WriteReg(ModeReg, 0x3D);              //Ä¬ÈÏÎª0x3F,ÉèÖÃCRCĞ­´¦ÀíÆ÷µÄÔ¤ÉèÖµÎª0x6363[ISO 14443-3 part 6.2.4]
-	RC522_AntennaOn();                  //Ê¹ÄÜÌìÏßÇı¶¯Æ÷Òı½ÅTX1ºÍTX2(ÖØÖÃ»á×Ô¶¯¹Ø±Õ)
+	WriteReg(TxASKReg, 0x40);				// é»˜è®¤ä¸º0x00ï¼Œå¼ºåˆ¶100%ASKè°ƒåˆ¶
+	WriteReg(ModeReg, 0x3D);				// é»˜è®¤ä¸º0x3Fï¼Œè®¾ç½®CRCåå¤„ç†å™¨çš„é¢„è®¾å€¼ä¸º0x6363[ISO 14443-3 part 6.2.4]
+	RC522_AntennaOn();						// ä½¿èƒ½å¤©çº¿é©±åŠ¨å™¨å¼•è„šTX1å’ŒTX2(é‡ç½®ä¼šè‡ªåŠ¨å…³é—­)
 }
 
 /*
-* ¹¦    ÄÜ£ºÖØÖÃMFRC522
+* åŠŸ    èƒ½ï¼šé‡ç½®MFRC522
 */
 void MFRC522::RC522_Reset() {
-	WriteReg(CommandReg, RC522_SoftReset);  //·¢ËÍÈíÖØÖÃÃüÁî
-	delay(50);                            //µÈ´ı¾§ÕñÆğÕñºÍÎÈ¶¨£¬ÖÁÉÙĞèÒªt_startup(Æô¶¯Ê±¼ä)+t_delay(37.74us),ÕâÀï¸ø50ms×ã¹»ÁË[Êı¾İÊÖ²á8.8.2²¿·Ö]
+	WriteReg(CommandReg, RC522_CMD_SoftReset);	// å‘é€è½¯é‡ç½®å‘½ä»¤
+	delay(50);									// ç­‰å¾…æ™¶æŒ¯èµ·æŒ¯å’Œç¨³å®šï¼Œè‡³å°‘éœ€è¦t_startup(å¯åŠ¨æ—¶é—´)+t_delay(37.74us)ï¼Œè¿™é‡Œç»™50msè¶³å¤Ÿäº†[æ•°æ®æ‰‹å†Œ8.8.2éƒ¨åˆ†]
 	while (ReadReg(CommandReg) & (1 << 4));
 }
 
 /*
-* ¹¦    ÄÜ£º¿ªÆôMFRC522ÌìÏß
+* åŠŸ    èƒ½ï¼šå¼€å¯MFRC522å¤©çº¿
 */
 void MFRC522::RC522_AntennaOn() {
 	byte temp;
@@ -149,15 +217,15 @@ void MFRC522::RC522_AntennaOn() {
 }
 
 /*
-* ¹¦    ÄÜ£º¹Ø±ÕMFRC522ÌìÏß
+* åŠŸ    èƒ½ï¼šå…³é—­MFRC522å¤©çº¿
 */
 void MFRC522::RC522_AntennaOff() {
 	ClearRegBitMask(TxControlReg, 0x03);
 }
 
 /*
-* ¹¦    ÄÜ£º»ñÈ¡µ±Ç°MFRC522½ÓÊÕÆ÷ÔöÒæÖµ
-* ·µ    »Ø£ºRxGainµÄÖµ<<4 [Êı¾İÊÖ²á9.3.3.6²¿·Ö]
+* åŠŸ    èƒ½ï¼šè·å–å½“å‰MFRC522æ¥æ”¶å™¨å¢ç›Šå€¼
+* è¿”    å›ï¼šRxGainçš„å€¼<<4 [æ•°æ®æ‰‹å†Œ9.3.3.6éƒ¨åˆ†]
 *           0x00  18dB
 *           0x10  23dB
 *           0x20  18dB
@@ -172,8 +240,8 @@ byte MFRC522::RC522_GetAntennaGain() {
 }
 
 /*
-* ¹¦    ÄÜ£º»ñÈ¡µ±Ç°MFRC522½ÓÊÕÆ÷ÔöÒæÖµ
-* ²ÎÊıËµÃ÷£ºmask[ÊäÈë]£ºRxGainµÄÖµ<<4 [Êı¾İÊÖ²á9.3.3.6²¿·Ö]
+* åŠŸ    èƒ½ï¼šè·å–å½“å‰MFRC522æ¥æ”¶å™¨å¢ç›Šå€¼
+* å‚æ•°è¯´æ˜ï¼šmask[è¾“å…¥]ï¼šRxGainçš„å€¼<<4 [æ•°æ®æ‰‹å†Œ9.3.3.6éƒ¨åˆ†]
 *                       0x00  18dB
 *                       0x10  23dB
 *                       0x20  18dB
@@ -190,3 +258,55 @@ void MFRC522::RC522_SetAntennaGain(byte mask) {
 	}
 }
 
+MFRC522::StatusCode MFRC522::RC522_CommunicateWithPICC(byte command, byte * sendData, byte sendLen, byte * receiveData, byte * receiveLen) {
+	byte n, waitIRq;
+	unsigned int i;
+
+	switch (command) {
+		case RC522_CMD_Transceive:
+			waitIRq = 0x30;						// æ¥æ”¶RxIRqã€IdleIRqä¸­æ–­
+			break;
+		default:
+			break;
+	}
+
+	WriteReg(CommandReg, RC522_CMD_Idle);		// åœæ­¢ä»»ä½•åœ¨æ´»åŠ¨çš„å‘½ä»¤
+	ClearRegBitMask(ComIrqReg, 0x80);			// æ¸…é™¤ComIrqRegä¸­æ‰€æœ‰çš„ä¸­æ–­è¯·æ±‚æ ‡å¿—ä½
+	SetRegBitMask(FIFOLevelReg, 0x80);			// FlushBufferç½®ä½ï¼ŒFIFOåˆå§‹åŒ–
+	WriteReg(FIFODataReg, sendLen, sendData);	// å‘é€æ•°æ®å†™å…¥FIFO
+	WriteReg(CommandReg, command);				// æ‰§è¡Œå‘½ä»¤
+
+	if (command == RC522_CMD_Transceive) {
+		SetRegBitMask(BitFramingReg, 0x80);		// StartSendç½®ä½ï¼Œå¼€å§‹ä¼ é€æ•°æ®
+	}
+
+	i = 2000;									// ç­‰å¾…å‘½ä»¤æ‰§è¡Œå®Œæˆï¼Œè¯¥whileå¾ªç¯çš„æ¯æ¬¡è¿­ä»£ä¼°è®¡éœ€è¦17.86us
+	while (1) {
+		n = ReadReg(ComIrqReg);					// ComIrqReg[7..0]çš„å†…å®¹ä¸ºï¼šSet1 TxIRq RxIRq IdleIRq HiAlertIRq LoAlertIRq ErrIRq TimerIRq
+		if (n & waitIRq) {						// ä¸€ä¸ªä¸­æ–­ä¿¡å·è¢«æˆåŠŸè®¾ç½®
+			break;
+		}
+		if (n & 0x01) {							// å®šæ—¶å™¨ä¸­æ–­ï¼Œ25mså†…æœªæ”¶åˆ°ä»»ä½•æ•°æ®ï¼ˆåœ¨PCD_Init()å·²å°†TModeRegå¯„å­˜å™¨çš„TAutoç½®ä½ï¼ŒRC522å‘é€å®Œæ¯•åè‡ªåŠ¨å¯åŠ¨å®šæ—¶å™¨ï¼‰
+			return STATUS_TIMEOUT;
+		}
+		if (--i == 0) {							// 35.7mså†…æ²¡å®Œæˆï¼Œè¶…æ—¶ç»ˆæ­¢ï¼Œä¸RC522çš„é€šè®¯å¯èƒ½æ–­å¼€äº†
+			return STATUS_TIMEOUT;
+		}
+	}
+
+	byte errorRegValue = ReadReg(ErrorReg);
+	if (errorRegValue & 0x13) {					// å‡ºç°ä»¥ä¸‹é”™è¯¯ä¸­æ–­ï¼šBufferOvfl ParityErr ProtocolErr
+		return STATUS_ERROR;
+	}
+
+	if (receiveData && receiveLen) {			// åˆ¤æ–­æ˜¯å¦éœ€è¦æ¥æ”¶æ•°æ®
+		n = ReadReg(FIFOLevelReg);				// FIFOå†…æ•°æ®çš„å­—èŠ‚æ•°
+		if (n > *receiveLen) {
+			return STATUS_NO_ROOM;
+		}
+		*receiveLen = n;						// æ¥æ”¶åˆ°çš„æ•°æ®çš„å­—èŠ‚æ•°
+		ReadReg(FIFODataReg, n, receiveData);	// ä»FIFOä¸­è·å–æ¥æ”¶åˆ°çš„æ•°æ®
+	}
+
+	return STATUS_OK;
+}
