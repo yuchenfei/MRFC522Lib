@@ -115,9 +115,9 @@ public:
 	//标签相关指令
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	enum PICC_Command {
-		// The commands used by the PCD to manage communication with several PICCs (ISO 14443-3, Type A, section 6.4)
-		PICC_CMD_REQA			= 0x26,	// REQuest command, Type A. Invites PICCs in state IDLE to go to READY and prepare for anticollision or selection. 7 bit frame.
-		PICC_CMD_WUPA			= 0x52,	// Wake-UP command, Type A. Invites PICCs in state IDLE and HALT to go to READY(*) and prepare for anticollision or selection. 7 bit frame.
+		// 读写器与几种标签通信的管理命令有：REQA、WUPA、ANTICOLLISION、SELECT、HLTA [ISO 14443-3 section 6.2.4]
+		PICC_CMD_REQA			= 0x26,	// 寻找天线范围内未睡眠的卡，标签由“空闲”状态进入“准备”状态，准备进行防碰撞或选择，命令长度为7位
+		PICC_CMD_WUPA			= 0x52,	// 寻找天线范围内所有的卡，标签由“空闲”、“睡眠”状态进入“准备”状态，准备进行防碰撞或选择，命令长度为7位
 		PICC_CMD_CT				= 0x88,	// Cascade Tag. Not really a command, but used during anti collision.
 		PICC_CMD_SEL_CL1		= 0x93,	// Anti collision/Select, Cascade Level 1
 		PICC_CMD_SEL_CL2		= 0x95,	// Anti collision/Select, Cascade Level 2
@@ -143,10 +143,11 @@ public:
 	//返回状态码
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	enum StatusCode {
-		STATUS_OK		= 1,	// 成功
-		STATUS_ERROR	= 2,	// 通讯错误
-		STATUS_TIMEOUT	= 3,	// 通讯超时
-		STATUS_NO_ROOM	= 4		// 存储空间不足
+		STATUS_OK			= 1,	// 成功
+		STATUS_ERROR		= 2,	// 通讯错误
+		STATUS_TIMEOUT		= 3,	// 通讯超时
+		STATUS_NO_ROOM		= 4,	// 存储空间不足
+		STATUS_COLLISION	= 5		// 发生碰撞
 	};
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +188,17 @@ public:
 	void RC522_AntennaOff();
 	byte RC522_GetAntennaGain();
 	void RC522_SetAntennaGain(byte mask);
-	MFRC522::StatusCode RC522_CommunicateWithPICC(byte command, byte *sendData, byte sendLen, byte *receiveData = NULL, byte *receiveLen = NULL);
+	MFRC522::StatusCode RC522_CommunicateWithPICC(byte command, byte *sendData, byte sendLen, byte *receiveData = NULL, byte *receiveLen = NULL, byte *validBits = NULL, byte rxAlign = 0);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	//标签操作函数
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	MFRC522::StatusCode PICC_Request(byte reqCommand, byte *bufferATQA, byte *bufferSize);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	//辅助函数
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	String GetStatusCodeName(MFRC522::StatusCode code);
 
 private:
 	byte _chipSelectPin;    //SPI从机使能引脚（Pin 24, NSS,低电平使能）
