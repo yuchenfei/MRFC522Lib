@@ -305,7 +305,7 @@ MFRC522::StatusCode MFRC522::RC522_CommunicateWithPICC(byte command, byte * send
 			break;
 		}
 		if (n & 0x01) {								// 定时器中断，25ms内未收到任何数据（在PCD_Init()已将TModeReg寄存器的TAuto置位，RC522发送完毕后自动启动定时器）
-			return STATUS_TIMEOUT;
+			return STATUS_NO_TAG;					// 未检测到标签
 		}
 		if (--i == 0) {								// 35.7ms内没完成，超时终止，与RC522的通讯可能断开了
 			return STATUS_TIMEOUT;
@@ -341,27 +341,57 @@ MFRC522::StatusCode MFRC522::RC522_CommunicateWithPICC(byte command, byte * send
 //标签操作函数
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
-| 功    能：传送数据至FIFO缓冲区，执行命令，等待完成并接收FIFO内收到的新数据
-| 参数说明：requsetCommand	[输入]：		请求命令，PICC_CMD_REQA 或 PICC_CMD_WUPA 中的一个
-|			* bufferATQA	[输出]：		指向用于接收ATGA的缓冲区
-|			* bufferSize	[输入/输出]：	[输入]：缓冲区的大小；[输出]：实际接收到的字节数
+| 功    能：发送REQA或WUPA命令，可用于检测天线范围内是否存在标签
+| 参数说明：requsetCommand	[输入]：请求命令，PICC_CMD_REQA或PICC_CMD_WUPA中的一个
+|			* bufferATQA	[输出]：指向用于接收ATGA的缓冲区（2字节）
+| 返    回：STATUS_OK表示成功，其他结果参照状态码
 */
-MFRC522::StatusCode MFRC522::PICC_Request(byte requsetCommand, byte * bufferATQA, byte * bufferSize) {
+MFRC522::StatusCode MFRC522::PICC_Request(byte requsetCommand, byte * bufferATQA) {
 	byte validBits;
 	MFRC522::StatusCode status;
 
-	if (bufferATQA == NULL || *bufferSize < 2) {	// ATQA的长度为2字节
+	byte bufferSize = sizeof(bufferATQA);		// 读取ATQA缓冲区的大小
+	if (bufferSize < 2) {						// ATQA的长度应为2字节
 		return STATUS_NO_ROOM;
 	}
 	ClearRegBitMask(CollReg, 0x80);
 	validBits = 7;
-	status = RC522_CommunicateWithPICC(RC522_CMD_Transceive, &requsetCommand, 1, bufferATQA, bufferSize, &validBits);
+	status = RC522_CommunicateWithPICC(RC522_CMD_Transceive, &requsetCommand, 1, bufferATQA, &bufferSize, &validBits);
 	if (status != STATUS_OK) {
 		return status;
 	}
-	if (*bufferSize != 2 || validBits != 0) {		// ATQA需正好2字节
+	if (bufferSize != 2 || validBits != 0) {	// ATQA需正好2字节
 		return STATUS_ERROR;
 	}
+	return STATUS_OK;
+}
+
+/*
+| 功    能：发送防碰撞命令，获取卡号
+| 参数说明：* bufferUID	[输出]：指向用于接收UID的缓冲区
+| 返    回：STATUS_OK表示成功，其他结果参照状态码
+*/
+MFRC522::StatusCode MFRC522::PICC_Anticollision(byte *bufferUID) {
+	byte i, sendData[2], uidCheck = 0;
+	MFRC522::StatusCode status;
+
+	ClearRegBitMask(CollReg, 0x80);
+
+	byte buffersize = 5;					// 目前只能读取S50卡序列号
+	sendData[0] = PICC_CMD_SEL_CL1;
+	sendData[1] = 0x20;
+	status = RC522_CommunicateWithPICC(RC522_CMD_Transceive, sendData, 2, bufferUID, &buffersize);
+	if (status != STATUS_OK) {
+		return status;
+	}
+
+	for (i = 0; i < 4; ++i) {				// 校验序列号
+		uidCheck ^= bufferUID[i];
+	}
+	if (uidCheck != bufferUID[i]) {
+		return STATUS_ERROR;
+	}
+
 	return STATUS_OK;
 }
 
@@ -370,11 +400,13 @@ MFRC522::StatusCode MFRC522::PICC_Request(byte requsetCommand, byte * bufferATQA
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 String MFRC522::GetStatusCodeName(MFRC522::StatusCode code) {
 	switch (code) {
-		case STATUS_OK:				return "Success.";
+		case STATUS_OK:				return "OK";
 		case STATUS_ERROR:			return "Error in communication.";
 		case STATUS_TIMEOUT:		return "Timeout in communication.";
+		case STATUS_NO_TAG:			return "No tag detected.";
 		case STATUS_NO_ROOM:		return "A buffer is not big enough.";
 		case STATUS_COLLISION:		return "Collission detected.";
-		default:					return "Unknown error";
+		default:					return "Unknown error.";
 	}
+	return;
 }
